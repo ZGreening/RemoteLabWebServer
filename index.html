@@ -1,0 +1,181 @@
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!--<meta http-equiv="X-UA-Compatible" content="ie=edge">-->
+    <title>Welcome to the Remote Physics Lab</title>
+    <link rel="stylesheet" href="main.css">
+    <link rel="stylesheet" href="App.css">
+    <link href="https://fonts.googleapis.com/css?family=Muli" rel="stylesheet">
+    <script src="jquery-3.4.1.min.js"></script>
+</head>
+
+<body>
+
+    <div className="App">
+
+        <div class="jumbotron">
+            <h1 class="display-4">Remote Physics Lab</h1>
+            <p class="lead">Helping students learn Physics from anywhere</p>
+        </div>
+
+        <!-- {/* YouTube Player for the stream */}-->
+        <div class="card mb-3">
+            <iframe width="1024" height="576" src="https://www.youtube.com/embed/3CvLnuBV-B4?&amp;showinfo=0"
+                frameBorder="0" allow="autoplay; encrypted-media"></iframe>
+            <center class="card-body">
+                <h5 class="card-title">Live Video</h5>
+                <br />
+                <button type="button" class="btn btn-primary">Request Access</button>
+                <p class="card-text"><small class="text-muted">X students waiting</small></p>
+            </center>
+        </div>
+
+        <div class="row">
+
+            <div class="col-sm-6">
+                <div class="card border-light">
+                    <div class="card-body">
+                        <h5 class="card-title">Deflecting Voltage</h5>
+
+                        <div class="slidecontainer">
+                            <input id="volt-def-slider" type="range" min="50" max="250" step="1" value="0"
+                                class="slider"></input>
+                            <p id="volt-def-value"></p>
+                        </div>
+
+                        <div class="btn-group" role="group" aria-label="Basic example">
+                            <button type="button" class="btn btn-secondary">Positive</button>
+                            <button type="button" class="btn btn-secondary">Off</button>
+                            <button type="button" class="btn btn-secondary">Negative</button>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-sm-6">
+                <div class="card border-light">
+                    <div class="card-body">
+                        <h5 class="card-title">Magnetizing Current</h5>
+
+                        <div class="slidecontainer">
+                            <input id="curr-slider" type="range" min="0" value="0" max="3" step="0.05"
+                                class="slider"></input>
+                            <p id="curr-value"></p>
+                        </div>
+
+                        <div class="btn-group" role="group" aria-label="Basic example">
+                            <button type="button" class="btn btn-secondary">Clockwise</button>
+                            <button type="button" class="btn btn-secondary">Off</button>
+                            <button type="button" class="btn btn-secondary">Counter Clockwise</button>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-sm-6">
+                <div class="card border-light">
+                    <div class="card-body">
+                        <h5 class="card-title">Accelerating Voltage</h5>
+                        <!-- {/* <slider></slider> */}-->
+
+                        <div class="slidecontainer">
+                            <!--  {/* TODO: Using the Library to create the sliders for react */}-->
+                            <input id="volt-acc-slider" type="range" min="0" max="250" step="1" value="0"
+                                class="slider"></input>
+                            <p id="volt-acc-value"></p>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // Deflecting Voltage
+        var defVoltageSlider = document.getElementById("volt-def-slider");
+        var defVoltageValue = document.getElementById("volt-def-value");
+        defVoltageValue.innerHTML = defVoltageSlider.value + " Volts";
+
+        // Accelerating Voltage
+        var accVoltageSlider = document.getElementById("volt-acc-slider");
+        var accVoltageValue = document.getElementById("volt-acc-value");
+        accVoltageValue.innerHTML = accVoltageSlider.value + " Volts";
+
+        // Current
+        var currentSlider = document.getElementById("curr-slider");
+        var currentValue = document.getElementById("curr-value");
+        currentValue.innerHTML = currentSlider.value + " Amperes";
+
+        // Get initial values when page loads
+        onload = function () {
+            updateDeflectingVoltage();
+            updateAcceleratingVoltage();
+            updateCurrentVoltage();
+        }
+
+        // handle defecting voltage moved
+        defVoltageSlider.onchange = function () {
+            defVoltageValue.innerHTML = this.value + " Volts"; //Range 50 to 250 volts
+            $.post('database.php', {
+                function: 'setDeflectingVoltage', arguments:
+                    [this.value]
+            }, function (response) { if ('error' in response) alert(response['error']) });
+        }
+
+        // handle accelerating voltage moved
+        accVoltageSlider.onchange = function () {
+            accVoltageValue.innerHTML = this.value + " Volt" + ((this.value == 1.0) ? "" : "s"); //Range 0 to 250 volts
+            $.post('database.php', {
+                function: 'setAcceleratingVoltage', arguments:
+                    [this.value]
+            }, function (response) { if ('error' in response) alert(response['error']) });
+        }
+
+        // handle current moved
+        currentSlider.onchange = function () {
+            currentValue.innerHTML = this.value + " Ampere" + ((this.value == 1) ? "" : "s"); //Range 0 to 3.0 amps
+            $.post('database.php', {
+                function: 'setCurrentAmperage', arguments:
+                    [this.value]
+            }, function (response) { if ('error' in response) alert(response['error']) });
+        }
+
+        //Update the page with deflecting voltage from the database
+        function updateDeflectingVoltage() {
+            $.get('database.php', { function: 'getDeflectingVoltage' }, function (data) {
+                if ('value' in data) {
+                    defVoltageSlider.value = data['value']; //May cause redundant setDef. network call
+                    defVoltageValue.innerHTML = data['value'] + " Volts"; //Range 50 to 250 volts
+                }
+            });
+        }
+
+        //Update the page with accelerating voltage from the database
+        function updateAcceleratingVoltage() {
+            $.get('database.php', { function: 'getAcceleratingVoltage' }, function (data) {
+                if ('value' in data) {
+                    accVoltageSlider.value = data['value']; //May cause redundant setDef. network call
+                    accVoltageValue.innerHTML = data['value'] + " Volts"; //Range 50 to 250 volts
+                }
+            });
+        }
+
+        //Update the page with current from the database
+        function updateCurrentAmperage() {
+            $.get('database.php', { function: 'getCurrentAmperage' }, function (data) {
+                if ('value' in data) {
+                    currentSlider.value = data['value']; //May cause redundant setDef. network call
+                    currentValue.innerHTML = data['value'] + " Volts"; //Range 50 to 250 volts
+                }
+            });
+        }
+    </script>
+</body>
+
+</html>

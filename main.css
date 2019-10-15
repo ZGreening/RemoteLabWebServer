@@ -1,0 +1,158 @@
+iframe {
+    width: 100%;
+    height: 35%;
+}
+
+* {
+    box-sizing: border-box;
+    font-family: 'Muli', sans-serif;
+}
+
+body {
+    margin: 10px;
+}
+
+.column {
+    float: left;
+    padding: 10px;
+}
+
+.two-column {
+    float: left;
+    width: 50%;
+    padding: 12px;
+}
+
+.row:after {
+    content: "";
+    display: table;
+    clear: both;
+}
+
+.left1, .right1 {
+    width: 20%;
+}
+
+.middle1 {
+    width: 60%;    
+}
+
+/* Responsive layout - makes the columns stack on top of each other */
+@media (max-width: 700px) {
+    .column {
+        width: 100%;
+    }
+    .two-column {
+        width: 100%;
+    }
+
+    iframe {
+        width: 100%;
+        height: 100%;
+    }  
+}
+
+/* Creating custom sliders so that the UI looks nicer */
+.slidecontainer {
+    width: 100%;
+}
+
+.slider {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 15px;
+    border-radius: 5px;
+    background: #d3d3d3;
+    outline: none;
+    opacity: 0.7;
+    transition: 0.2s;
+    -webkit-transition: 0.2s; /* Safari */
+    transition-duration: 0.2s;
+}
+
+.slider:hover {
+    opacity: 1;
+}
+
+.slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    background: #004785;
+    cursor: pointer;
+}
+
+.slider::-moz-range-thumb {
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    background: #004785;
+    cursor: pointer;
+}
+
+/* Global changes for the text attributes */
+h4, h2, h3, p {
+    text-align: center;
+}
+
+/* Adding some buttons in the same format as the slider */
+.button {
+    background: #004785;
+    opacity: 0.7;
+    font-size: 13px;
+    color: white;
+    border: none;
+    text-align: center;
+    text-decoration: none;
+    -webkit-transition-duration: 0.4s; /* Safari */
+    transition-duration: 0.4s;
+    border-radius: 3px;
+    cursor: pointer;
+    padding: 10px 20px;
+    margin: 0 auto;
+    display: block;
+}
+
+.button:hover {
+    opacity: 1;
+    color: white;
+}
+
+/* Adding some custom bordered buttons for switch selections */
+.btn-group .button-stack1 {
+    background-color: #5F879F;
+    border: none;
+    color: white;
+    padding: 10px 20px;
+    text-align: center;
+    text-decoration: none;
+    font-size: 16px;
+    -webkit-transition-duration: 0.4s; /* Safari */
+    transition-duration: 0.4s;
+    cursor: pointer;
+    float: left;
+}
+
+.btn-group .button-stack2 {
+    background-color: #5F879F;
+    border: none;
+    color: white;
+    padding: 10px 20px;
+    text-align: center;
+    text-decoration: none;
+    font-size: 16px;
+    -webkit-transition-duration: 0.4s; /* Safari */
+    transition-duration: 0.4s;
+    cursor: pointer;
+    float: right;
+}
+
+.btn-group .button-stack1:hover {
+    background-color: #004785;
+}
+
+.btn-group .button-stack2:hover {
+    background-color: #004785;
+}
