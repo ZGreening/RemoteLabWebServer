@@ -1,4 +1,5 @@
-<?php
+<?php 
+    header('Content-Type: application/json');
 
     //Generic database getter function
     //
@@ -33,10 +34,58 @@
             return "Connection failed: " . $exception->getMessage();
         }
 
-        $connection->exec(sprintf("UPDATE data SET Values_=%s WHERE Variables=='%s';",$value,$variable));
+        $connection->exec(sprintf("UPDATE data SET Values_=%d WHERE Variables=='%s';",$value,$variable));
         $connection=null;
     }
 
+    //Request access to control lab device. This function adds an IP address into the queue in the database.
+    //
+    // $IP = the ip address of the requesting computer
+    function requestAccess($IP) {
+        try {
+            $connection = new PDO("sqlite:RemotePhysLab.db");
+            $connection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        } catch(PDOException $exception) {
+            $result['error'] = "Connection failed: " . $exception->getMessage();
+            return $result;
+        }
+
+        try {
+            $connection->exec(sprintf("INSERT INTO queue(IP) VALUES ('%s');",$IP));
+        } catch(PDOException $exception) {
+            //Unique constraint fails indicate request already made
+            $result['error'] = "Error: You are already queued";
+        }
+
+        $connection=null;
+        return $result;
+    }
+
+    //Returns the number of computer IP addresses in the database queue
+    function getNumberComputersWaiting() {
+        try {
+            $connection = new PDO("sqlite:RemotePhysLab.db");
+            $connection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        } catch(PDOException $exception) {
+            return "Connection failed: " . $exception->getMessage();
+        }
+
+        $query = $connection->query("SELECT count(*) FROM queue;");
+        $query_result = $query->fetch();
+        $value = $query_result[0];
+
+        $connection=null;
+        return $value;
+    }
+
+    //TODO
+    function hasAccess($IP) {
+        return true;
+    }
+
+
+
+    /////////// Database Getters and Setters //////////
     function setDefVoltage($voltage) {
         setDatabaseValue("deflectingVoltage",$voltage);
     }
@@ -67,19 +116,15 @@
     function getDefVoltagePolarity() {
         return getDatabaseValue("deflectingPolarity");
     }
-
-
-    /////////// START OF MAIN SCRIPT ///////////
-    header('Content-Type: application/json');
-    $result = array();
-
-    //Handle HTTP Post requests
-    if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    
+    //////////// HTTP Request Handlers ////////////
+    function handlePostRequest() {
         if(!isset($_POST['function'])) {
             $result['error'] = 'No function name!'; 
         } else if( !isset($_POST['arguments']) ) {
             $result['error'] = 'No function arguments!';
-        } else {
+        } else if( hasAccess($_SERVER['REMOTE_ADDR'])) {
+            //If the current user has access
             switch($_POST['function']) {
                 case 'setDefVoltage':
                     setDefVoltage($_POST['arguments'][0]);
@@ -100,11 +145,25 @@
                     $result['error'] = 'Not found function '.$_POST['function'].'!';
                     break;
             }
+        } else {
+            //If user does not have access
+            switch($_POST['function']) {
+                case 'setDefVoltage':
+                case 'setAccVoltage':
+                case 'setCurrentAmperage':
+                case 'setMagneticArc':
+                case 'setDefVoltagePolarity':
+                    $result['error'] = 'Access Denied';
+                    break;
+                default:
+                    $result['error'] = 'Not found function '.$_POST['function'].'!';
+                    break;
+            }
         }
+
+        return $result;
     }
-    
-    //Handle HTTP Get requests
-    if ($_SERVER['REQUEST_METHOD'] == 'GET') {
+    function handleGetRequest() {
         if(!isset($_GET['function'])) {
             $result['error'] = 'No function name!';
         } else {
@@ -124,13 +183,25 @@
                 case 'getDefVoltagePolarity':
                     $result['value'] = getDefVoltagePolarity();
                     break;
+                case 'getNumberComputersWaiting':
+                    $result['value'] = getNumberComputersWaiting();
+                    break;
+                case 'requestAccess':
+                    $result = requestAccess($_SERVER['REMOTE_ADDR']);
+                    break;
                 default:
                     $result['error'] = 'Not found function '.$_GET['function'].'!';
                     break;
             }
         }
+
+        return $result;
     }
 
-    echo json_encode($result);
-
+    /////////////// MAIN SCRIPT ////////////////
+    if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+        echo json_encode(handlePostRequest());
+    } else if ($_SERVER['REQUEST_METHOD'] == 'GET') {
+        echo json_encode(handleGetRequest());
+    }
 ?>
