@@ -27,8 +27,8 @@
             <center class="card-body">
                 <h5 class="card-title">Live Video</h5>
                 <br />
-                <button type="button" class="btn btn-primary">Request Access</button>
-                <p class="card-text"><small class="text-muted">X students waiting</small></p>
+                <button id="requestButton" type="button" class="btn btn-primary" onclick="onRequestAccessPressed(this)">Request Access</button>
+                <p class="card-text"><small id="computersWaiting" class="text-muted">0 Computers Waiting</small></p>
             </center>
         </div>
 
@@ -40,19 +40,19 @@
                         <h5 class="card-title">Deflecting Voltage</h5>
 
                         <div class="slidecontainer">
-                            <input id="volt-def-slider" type="range" min="50" max="250" step="1" value="0"
+                            <input id="defVoltageSlider" type="range" min="50" max="250" step="1" value="0"
                                 class="slider" onchange="onDefVoltageSliderChanged(this)"></input>
-                            <p id="volt-def-value"></p>
+                            <p id="defVoltageValue"></p>
                         </div>
 
                         <div class="btn-group" role="group" aria-label="Basic example">
                             &nbsp;
                             <!--use integer values are for database storage-->
-                            <input type="radio" name="voltage-polarity" onclick="onDefVoltagePolarityChanged(this)"
+                            <input type="radio" name="defVoltagePolarity" onclick="onDefVoltagePolarityChanged(this)"
                                 value="0"> Off &nbsp;
-                            <input type="radio" name="voltage-polarity" onclick="onDefVoltagePolarityChanged(this)"
+                            <input type="radio" name="defVoltagePolarity" onclick="onDefVoltagePolarityChanged(this)"
                                 value="1"> Positive &nbsp;
-                            <input type="radio" name="voltage-polarity" onclick="onDefVoltagePolarityChanged(this)"
+                            <input type="radio" name="defVoltagePolarity" onclick="onDefVoltagePolarityChanged(this)"
                                 value="2"> Negative
                         </div>
 
@@ -66,19 +66,19 @@
                         <h5 class="card-title">Magnetizing Current</h5>
 
                         <div class="slidecontainer">
-                            <input id="curr-slider" type="range" min="0" value="0" max="3" step="0.05" class="slider"
+                            <input id="currentSlider" type="range" min="0" value="0" max="3" step="0.05" class="slider"
                                 onchange="onCurrentSliderChanged(this)"></input>
-                            <p id="curr-value"></p>
+                            <p id="currentValue"></p>
                         </div>
 
                         <div class="btn-group" role="group" aria-label="Basic example">
                             &nbsp;
                             <!--use integer values are for database storage-->
-                            <input type="radio" name="magnetic-arc" onclick="onMagneticArcChanged(this)"
+                            <input type="radio" name="magneticArc" onclick="onMagneticArcChanged(this)"
                                 value="0"> Off &nbsp;
-                            <input type="radio" name="magnetic-arc" onclick="onMagneticArcChanged(this)"
+                            <input type="radio" name="magneticArc" onclick="onMagneticArcChanged(this)"
                                 value="1"> Clockwise &nbsp;
-                            <input type="radio" name="magnetic-arc" onclick="onMagneticArcChanged(this)"
+                            <input type="radio" name="magneticArc" onclick="onMagneticArcChanged(this)"
                                 value="2"> Counter Clockwise
                         </div>
 
@@ -91,9 +91,9 @@
                     <div class="card-body">
                         <h5 class="card-title">Accelerating Voltage</h5>
                         <div class="slidecontainer">
-                            <input id="volt-acc-slider" type="range" min="0" max="250" step="1" value="0" class="slider"
+                            <input id="accVoltageSlider" type="range" min="0" max="250" step="1" value="0" class="slider"
                                 onchange="onAccVoltageSliderChanged(this)"></input>
-                            <p id="volt-acc-value"></p>
+                            <p id="accVoltageValue"></p>
                         </div>
 
                     </div>
