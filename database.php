@@ -37,16 +37,16 @@
         $connection=null;
     }
 
-    function setDeflectingVoltage($voltage) {
+    function setDefVoltage($voltage) {
         setDatabaseValue("deflectingVoltage",$voltage);
     }
-    function getDeflectingVoltage() {
+    function getDefVoltage() {
         return getDatabaseValue("deflectingVoltage");
     }
-    function setAcceleratingVoltage($voltage) {
+    function setAccVoltage($voltage) {
         setDatabaseValue("acceleratingVoltage",$voltage);
     }
-    function getAcceleratingVoltage() {
+    function getAccVoltage() {
         return getDatabaseValue("acceleratingVoltage");
     }
     function setCurrentAmperage($voltage) {
@@ -54,6 +54,18 @@
     }
     function getCurrentAmperage() {
         return getDatabaseValue("magnetizingCurrent");
+    }
+    function setMagneticArc($arc) {
+        setDatabaseValue("magneticArc",$arc);
+    }
+    function getMagneticArc() {
+        return getDatabaseValue("magneticArc");
+    }
+    function setDefVoltagePolarity($polarity) {
+        setDatabaseValue("deflectingPolarity",$polarity);
+    }
+    function getDefVoltagePolarity() {
+        return getDatabaseValue("deflectingPolarity");
     }
 
 
@@ -69,14 +81,20 @@
             $result['error'] = 'No function arguments!';
         } else {
             switch($_POST['function']) {
-                case 'setDeflectingVoltage':
-                    setDeflectingVoltage($_POST['arguments'][0]);
+                case 'setDefVoltage':
+                    setDefVoltage($_POST['arguments'][0]);
                     break;
-                case 'setAcceleratingVoltage':
-                    setAcceleratingVoltage($_POST['arguments'][0]);
+                case 'setAccVoltage':
+                    setAccVoltage($_POST['arguments'][0]);
                     break;
                 case 'setCurrentAmperage':
                     setCurrentAmperage($_POST['arguments'][0]);
+                    break;
+                case 'setMagneticArc':
+                    setMagneticArc($_POST['arguments'][0]);
+                    break;
+                case 'setDefVoltagePolarity':
+                    setDefVoltagePolarity($_POST['arguments'][0]);
                     break;
                 default:
                     $result['error'] = 'Not found function '.$_POST['function'].'!';
@@ -91,14 +109,20 @@
             $result['error'] = 'No function name!';
         } else {
             switch($_GET['function']) {
-                case 'getDeflectingVoltage':
-                    $result['value'] = getDeflectingVoltage();
+                case 'getDefVoltage':
+                    $result['value'] = getDefVoltage();
                     break;
-                case 'getAcceleratingVoltage':
-                    $result['value'] = getAcceleratingVoltage();
+                case 'getAccVoltage':
+                    $result['value'] = getAccVoltage();
                     break;
                 case 'getCurrentAmperage':
                     $result['value'] = getCurrentAmperage();
+                    break;
+                case 'getMagneticArc':
+                    $result['value'] = getMagneticArc();
+                    break;
+                case 'getDefVoltagePolarity':
+                    $result['value'] = getDefVoltagePolarity();
                     break;
                 default:
                     $result['error'] = 'Not found function '.$_GET['function'].'!';
