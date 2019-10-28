@@ -17,8 +17,9 @@
 
         <div class="jumbotron">
             <h1 class="display-4">Remote Physics Lab</h1>
-            <p class="lead">Helping students learn Physics from anywhere</p>
+            <p>Helping students learn Physics from anywhere</p>
         </div>
+        
 
         <!-- {/* YouTube Player for the stream */}-->
         <div class="card mb-3">
@@ -29,6 +30,7 @@
                 <br />
                 <button id="requestButton" type="button" class="btn btn-primary" onclick="onRequestAccessPressed(this)">Request Access</button>
                 <p class="card-text"><small id="computersWaiting" class="text-muted">0 Computers Waiting</small></p>
+                <small class="lead" id="connectedFeedback" style="color:red;">Trying Connection</small>
             </center>
         </div>
 
