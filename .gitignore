@@ -1,2 +1,8 @@
 #Ignore macos filesystem files
 .DS_Store
+
+#Ignore support files
+/vendor
+
+#Ignore compiled Binary
+GrpcServer
