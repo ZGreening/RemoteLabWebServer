@@ -3,106 +3,69 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!--<meta http-equiv="X-UA-Compatible" content="ie=edge">-->
     <title>Welcome to the Remote Physics Lab</title>
     <link rel="stylesheet" href="index.css">
-    <link rel="stylesheet" href="app.css">
     <link href="https://fonts.googleapis.com/css?family=Muli" rel="stylesheet">
-    <script src="jquery-3.4.1.min.js"></script>
-    <script> $(document).ready(function () { $.getScript("index.js"); }); </script>
+    <script type="text/JavaScript" src="index.js"></script>
 </head>
 
 <body>
-    <div className="App">
+    <div>
+        <h1>Remote Physics Lab</h1>
+        <h5>Helping students learn Physics from anywhere</h5>
+    </div>
 
-        <div class="jumbotron">
-            <h1 class="display-4">Remote Physics Lab</h1>
-            <p>Helping students learn Physics from anywhere</p>
-        </div>
-        
+    <div>
+        <iframe width="500" height="400" frameBorder="0" src="https://www.youtube.com/embed/3CvLnuBV-B4?&amp;showinfo=0" allow="autoplay; encrypted-media"></iframe>
+        <center class="card-body">
+            <h5>Live Video</h5>
+            <br/>
+            <button id="requestButton" onclick="onRequestAccessPressed(this)">Request Access</button><br/>
+            <small id="computersBefore"></small>
+            <small id="computersWaiting">0 Computers Waiting</small><br/>
+            <small id="computersConnected">0 Computers Connected</small><br/>
+            <small id="controllingId">null Is In Control Of The Device</small><br/>
+            <small id="ownId">Your Computer ID is 0</small><br/>
+            <p id="connectedFeedback" style="color:red;">Trying Connection</p>
+        </center>
+    </div>
 
-        <!-- {/* YouTube Player for the stream */}-->
-        <div class="card mb-3">
-            <iframe width="1024" height="576" src="https://www.youtube.com/embed/3CvLnuBV-B4?&amp;showinfo=0"
-                frameBorder="0" allow="autoplay; encrypted-media"></iframe>
-            <center class="card-body">
-                <h5 class="card-title">Live Video</h5>
-                <br />
-                <button id="requestButton" type="button" class="btn btn-primary" onclick="onRequestAccessPressed(this)">Request Access</button>
-                <p class="card-text"><small id="computersWaiting" class="text-muted">0 Computers Waiting</small></p>
-                <small class="lead" id="connectedFeedback" style="color:red;">Trying Connection</small>
-            </center>
-        </div>
+    <div class="slideContainer">
+        <h4>Deflecting Voltage</h4>
+        <input id="defVoltageSlider" type="range" min="50" max="250" step="1" value="0" class="slider"
+            onchange="onDefVoltageSliderChanged(this)"></input>
+        <p id="defVoltageValue"></p>
+    </div>
 
-        <div class="row">
+    <div>
+        <!--use integer values are for database storage-->
+        <input type="radio" name="defVoltagePolarity" onclick="onDefVoltagePolarityChanged(this)" value="0">
+        Off &nbsp;
+        <input type="radio" name="defVoltagePolarity" onclick="onDefVoltagePolarityChanged(this)" value="1">
+        Positive &nbsp;
+        <input type="radio" name="defVoltagePolarity" onclick="onDefVoltagePolarityChanged(this)" value="2">
+        Negative
+    </div>
 
-            <div class="col-sm-6">
-                <div class="card border-light">
-                    <div class="card-body">
-                        <h5 class="card-title">Deflecting Voltage</h5>
+    <div class="slideContainer">
+        <h4>Magnetizing Current</h4>
+        <input id="currentSlider" type="range" min="0" value="0" max="3" step="0.05" class="slider"
+            onchange="onCurrentSliderChanged(this)"></input>
+        <p id="currentValue"></p>
+    </div>
 
-                        <div class="slidecontainer">
-                            <input id="defVoltageSlider" type="range" min="50" max="250" step="1" value="0"
-                                class="slider" onchange="onDefVoltageSliderChanged(this)"></input>
-                            <p id="defVoltageValue"></p>
-                        </div>
+    <div> 
+        <!--use integer values are for database storage-->
+        <input type="radio" name="magneticArc" onclick="onMagneticArcChanged(this)" value="0"> Off &nbsp;
+        <input type="radio" name="magneticArc" onclick="onMagneticArcChanged(this)" value="1"> Clockwise &nbsp;
+        <input type="radio" name="magneticArc" onclick="onMagneticArcChanged(this)" value="2"> Counter Clockwise
+    </div>
 
-                        <div class="btn-group" role="group" aria-label="Basic example">
-                            &nbsp;
-                            <!--use integer values are for database storage-->
-                            <input type="radio" name="defVoltagePolarity" onclick="onDefVoltagePolarityChanged(this)"
-                                value="0"> Off &nbsp;
-                            <input type="radio" name="defVoltagePolarity" onclick="onDefVoltagePolarityChanged(this)"
-                                value="1"> Positive &nbsp;
-                            <input type="radio" name="defVoltagePolarity" onclick="onDefVoltagePolarityChanged(this)"
-                                value="2"> Negative
-                        </div>
-
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-sm-6">
-                <div class="card border-light">
-                    <div class="card-body">
-                        <h5 class="card-title">Magnetizing Current</h5>
-
-                        <div class="slidecontainer">
-                            <input id="currentSlider" type="range" min="0" value="0" max="3" step="0.05" class="slider"
-                                onchange="onCurrentSliderChanged(this)"></input>
-                            <p id="currentValue"></p>
-                        </div>
-
-                        <div class="btn-group" role="group" aria-label="Basic example">
-                            &nbsp;
-                            <!--use integer values are for database storage-->
-                            <input type="radio" name="magneticArc" onclick="onMagneticArcChanged(this)"
-                                value="0"> Off &nbsp;
-                            <input type="radio" name="magneticArc" onclick="onMagneticArcChanged(this)"
-                                value="1"> Clockwise &nbsp;
-                            <input type="radio" name="magneticArc" onclick="onMagneticArcChanged(this)"
-                                value="2"> Counter Clockwise
-                        </div>
-
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-sm-6">
-                <div class="card border-light">
-                    <div class="card-body">
-                        <h5 class="card-title">Accelerating Voltage</h5>
-                        <div class="slidecontainer">
-                            <input id="accVoltageSlider" type="range" min="0" max="250" step="1" value="0" class="slider"
-                                onchange="onAccVoltageSliderChanged(this)"></input>
-                            <p id="accVoltageValue"></p>
-                        </div>
-
-                    </div>
-                </div>
-            </div>
-
-        </div>
+    <div class="slideContainer">
+        <h4>Accelerating Voltage</h4>
+        <input id="accVoltageSlider" type="range" min="0" max="250" step="1" value="0" class="slider"
+            onchange="onAccVoltageSliderChanged(this)"></input>
+        <p id="accVoltageValue"></p>
     </div>
 </body>
 

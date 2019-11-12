@@ -6,10 +6,13 @@ onload = function () {
         alert("Error: Your web browser is not supported");
     }
 
+    //Set Controls disabled by default
+    setControlsDisabled(true);
+
     //Get the current url to set up the web socket
     webSocket = new WebSocket("ws://" + location.host + ":8000");
 
-    webSocket.onopen = function () {
+    webSocket.onopen = function (connection) {
         document.getElementById("connectedFeedback").innerHTML = "Connected";
         document.getElementById("connectedFeedback").style = null;
     };
@@ -37,9 +40,28 @@ onload = function () {
             case 'magneticArc':
                 document.getElementsByName('magneticArc')[json[key]].checked = true;
                 break;
+            case 'computersBefore':
+                document.getElementById('computersBefore').innerHTML = json[key] + " Computers Before You<br/>";
+                break;
             case 'computersWaiting':
                 document.getElementById('computersWaiting').innerHTML = json[key] + " Computers Waiting";
                 break;
+            case 'computersConnected':
+                document.getElementById('computersConnected').innerHTML = json[key] + " Computers Connected";
+                break; 
+            case 'controllingId':
+                document.getElementById('controllingId').innerHTML = json[key] + " Is In Control Of The Device";
+                break;
+            case 'ownId':
+                document.getElementById('ownId').innerHTML = "Your Computer ID is " + json[key];
+                break;
+            case 'setControlsDisabled':
+                setControlsDisabled(json[key]);
+                if(!json[key]) {
+                    alert("Access Granted!");
+                    document.getElementById('computersBefore').innerHTML="You have access!<br/>";
+                }
+                break
             case 'error':
                 alert(json[key]);
                 break;
@@ -54,6 +76,18 @@ onload = function () {
         document.getElementById("connectedFeedback").style = "color:red;";
         webSocket=null;
     };
+}
+
+// Set all controls enabled or disabled
+function setControlsDisabled(isDisabled) {
+    document.getElementById("defVoltageSlider").disabled=isDisabled;
+    document.getElementById("accVoltageSlider").disabled=isDisabled;
+    document.getElementById("currentSlider").disabled=isDisabled;
+
+    for(var iii=0; iii<3; iii++) {
+        document.getElementsByName("defVoltagePolarity")[iii].disabled=isDisabled;
+        document.getElementsByName("magneticArc")[iii].disabled=isDisabled;
+    }
 }
 
 // Handle defecting voltage slider moved
