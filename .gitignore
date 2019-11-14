@@ -6,3 +6,6 @@
 
 #Ignore compiled Binary
 GrpcServer
+
+#Ingore database
+*.db
