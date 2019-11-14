@@ -1,4 +1,4 @@
-var webSocket 
+var webSocket
 
 //On load, set up web socket connection to handle real time events
 onload = function () {
@@ -23,15 +23,15 @@ onload = function () {
         for(key in json) {
             switch(key) {
             case 'defVoltage':
-                document.getElementById("defVoltageSlider").value = json[key]; //May cause redundant setDef. network call
+                document.getElementById("defVoltageSlider").value = json[key];
                 document.getElementById("defVoltageValue").innerHTML = json[key] + " Volts"; //Cannot be 1 so always append the plural form
                 break;
             case 'accVoltage':
-                document.getElementById("accVoltageSlider").value = json[key]; //May cause redundant setDef. network call
+                document.getElementById("accVoltageSlider").value = json[key];
                 document.getElementById("accVoltageValue").innerHTML = json[key] + " Volt" + ((json[key] == 1) ? "" : "s");
                 break;
             case 'currentAmperage':
-                document.getElementById("currentSlider").value = json[key] / 100.0; //May cause redundant setDef. network call
+                document.getElementById("currentSlider").value = json[key] / 100.0;
                 document.getElementById("currentValue").innerHTML = json[key] / 100.0 + " Ampere" + ((json[key] / 100.0 == 1) ? "" : "s");
                 break;
             case 'defVoltagePolarity':
@@ -41,7 +41,8 @@ onload = function () {
                 document.getElementsByName('magneticArc')[json[key]].checked = true;
                 break;
             case 'computersBefore':
-                document.getElementById('computersBefore').innerHTML = json[key] + " Computers Before You<br/>";
+                document.getElementById('computersBefore').innerHTML = 
+                    (json[key]>0) ? json[key] + " Computers Before You<br/>" : "You are next!<br/>";
                 break;
             case 'computersWaiting':
                 document.getElementById('computersWaiting').innerHTML = json[key] + " Computers Waiting";
@@ -56,12 +57,14 @@ onload = function () {
                 document.getElementById('ownId').innerHTML = "Your Computer ID is " + json[key];
                 break;
             case 'setControlsDisabled':
-                setControlsDisabled(json[key]);
-                if(!json[key]) {
+                setControlsDisabled(json[key]['isDisabled']);
+                if(!json[key]['isDisabled']) {
                     alert("Access Granted!");
                     document.getElementById('computersBefore').innerHTML="You have access!<br/>";
+                    //Set a timer to return control after the controlDuration has elapsed.
+                    setTimeout(function() {returnControl()},json[key]['controlDuration']); 
                 }
-                break
+                break;
             case 'error':
                 alert(json[key]);
                 break;
@@ -88,6 +91,14 @@ function setControlsDisabled(isDisabled) {
         document.getElementsByName("defVoltagePolarity")[iii].disabled=isDisabled;
         document.getElementsByName("magneticArc")[iii].disabled=isDisabled;
     }
+}
+
+function returnControl() {
+    webSocket.send(JSON.stringify({returnControl: null})); 
+    document.getElementById("requestButton").disabled=false;
+    document.getElementById("requestButton").textContent="Request Access";
+    document.getElementById("computersBefore").innerHTML=null;
+    alert("Returning Control");
 }
 
 // Handle defecting voltage slider moved

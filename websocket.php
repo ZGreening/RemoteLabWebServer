@@ -104,16 +104,15 @@ function getDefVoltagePolarity()
 //////////WEBSOCKET SERVER CLASS//////////
 class RatchetServer implements MessageComponentInterface
 {
-    private $intervalOfControl = 60000; //Milliseconds before next person gains access
+    private $controlDuration = 15000; //Milliseconds before control is returned
+    private $queue = []; //Clients who have requested access
     private $inControl; //The client in control of the device
-    private $queue; //Clients who have requested access
     private $clients; //All connected clients
 
     //Constructor
     public function __construct()
     {
         $this->clients = new \SplObjectStorage;
-        $this->queue = new \SplObjectStorage;
     }
 
     //Forwards a message from one client to all other connected clients
@@ -127,81 +126,79 @@ class RatchetServer implements MessageComponentInterface
         }
     }
 
-    //Sends the current data to all connected clients.
-    //Does not update computersBefore.
-    private function updateAllClients() {
-        $json = array('defVoltage' => getDefVoltage(),
-            'accVoltage' => getAccVoltage(),
-            'currentAmperage' => getCurrentAmperage(),
-            'defVoltagePolarity' => getDefVoltagePolarity(),
-            'magneticArc' => getMagneticArc(),
-            'computersWaiting' => count($this->queue),
-            'computersConnected' => count($this->clients),
-            'controllingId' => $this->inControl->resourceId);
-
-        //Send to all clients
-        foreach($this->clients as $client) {
-            $json['ownId'] = $client->resourceId; //Get the clients id to send
-            $client->send(json_encode($json));
+    //Sends the message to all connected computers
+    private function sendToAll($msg)
+    {
+        foreach ($this->clients as $client) {
+            $client->send($msg);
         }
     }
 
-    private function grantAccess($client) {
-        //If a client is currently in control, remove their control
-        if($this->inControl!=null) {
-            $this->inControl->send(json_encode(array('setControlsDisabled'=>true)));
+    //Updates how many computers are before each one in the queue
+    private function updateComputersBefore()
+    {
+        $iii = 0;
+        foreach ($this->queue as $user) {
+            $user->send(json_encode(array('computersBefore' => ($iii++))));
         }
+    }
+
+    //Updates Computers Connected, Computers Waiting, and the Controlling id on all computers
+    private function updateConnectionInfo()
+    {
+        $this->sendToAll(json_encode(array('computersConnected' => count($this->clients),
+            'computersWaiting' => count($this->queue), 'controllingId' => $this->inControl->resourceId)));
+    }
+
+    //Removes control from the current user and gives it to the next user in the queue
+    private function grantAccessToNext()
+    {
+        //Remove new client from queue and replace inControl with the new client
+        $this->inControl = array_shift($this->queue);
+
+        //Remove control and update computer info
+        $this->sendToAll(json_encode(array('setControlsDisabled' => ['isDisabled' => true])));
+        $this->updateComputersBefore();
+        $this->updateConnectionInfo();
 
         //Allow control to new client
-        $client->send(json_encode(array('setControlsDisabled'=>false)));
-
-        //Remove new client from queue and replace inControl with the new client
-        $this->queue->detach($client);
-        $this->inControl=$client;
-
-        //Update computers in queue to all the computers who have requested access
-        $iii=0;
-        foreach($this->queue as $user)
-        {
-            $user->send(json_encode(array('computersBefore'=>($iii++))));
+        if ($this->inControl != null) {
+            $this->inControl->send(json_encode(array('setControlsDisabled' => ['isDisabled' => false,
+                'controlDuration' => $this->controlDuration])));
         }
-
-        //Update all clients data
-        $this->updateAllClients();
-    } 
+    }
 
     /////////////WEBSOCKET FUNCTIONS/////////////
     public function onOpen(ConnectionInterface $connection)
     {
         $this->clients->attach($connection);
-        $this->updateAllClients();
         echo "New connection! ({$connection->resourceId})\n";
+
+        $json = array('defVoltage' => getDefVoltage(),
+            'accVoltage' => getAccVoltage(),
+            'currentAmperage' => getCurrentAmperage(),
+            'defVoltagePolarity' => getDefVoltagePolarity(),
+            'magneticArc' => getMagneticArc(),
+            'ownId' => $connection->resourceId);
+
+        $connection->send(json_encode($json));
+        $this->updateConnectionInfo();
     }
 
     public function onClose(ConnectionInterface $connection)
     {
         $this->clients->detach($connection); //Remove user from clients list
-        $this->queue->detach($connection); //Remove user from access queue
+        unset($this->queue[$connection->resourceId]); //Remove user from access queue
+        echo "Connection {$connection->resourceId} has disconnected\n";
 
         //Update person in control of the device
-        if($this->inControl==$connection) {
-            if(count($this->queue)>0) {
-                $this->grantAccess($this->queue->current()); //New controller from queue
-            } else {
-                $this->inControl=null; //No one if queue is empty
-            }
+        if ($this->inControl == $connection) {
+            $this->grantAccessToNext();
         }
 
-        //Update computers in queue to all the computers who have requested access
-        $iii=0;
-        foreach($this->queue as $user)
-        {
-            $user->send(json_encode(array('computersBefore'=>($iii++))));
-        }
-
-        //Update all clients data
-        $this->updateAllClients();
-        echo "Connection {$connection->resourceId} has disconnected\n";
+        //Update computer info
+        $this->updateComputersBefore();
+        $this->updateConnectionInfo();
     }
 
     public function onError(ConnectionInterface $connection, \Exception $exception)
@@ -236,33 +233,28 @@ class RatchetServer implements MessageComponentInterface
                         setMagneticArc($value);
                         $this->forwardMessage($from, $msg);
                         break;
-                    case 'requestAccess':
-                        $from->send(json_encode(array('error' => "Error: You already have access")));
+                    case 'returnControl':
+                        $this->grantAccessToNext();
                         break;
                     default:
                         $from->send(json_encode(array('error' => "Error: Unknown function")));
                 }
-            } else if ($key == 'requestAccess') { //If client does not already have access.
-                if(count($this->queue)==0 && $this->inControl==null) {
-                    $this->grantAccess($from);
-                } else {
-                    //Display computers currently enqueued
-                    $from->send(json_encode(array('computersBefore' => count($this->queue))));
-                    $this->queue->attach($from); //enqueue user
+            } else if ($key == 'requestAccess') {
+                $this->queue[$from->resourceId] = $from;
 
-                    //Update computers waiting on all clients
-                    foreach ($this->clients as $client) {
-                        $client->send(json_encode(array('computersWaiting' => count($this->queue))));
-                    }
+                //If no one is currently controlling the device, go ahead and grant access
+                if ($this->inControl == null) {
+                    $this->grantAccessToNext();
                 }
-            } else {
-                //Should never execute
-                $from->send(json_encode(array('error' => "Error: You do not have access")));
+
+                //Update info on all other computers
+                $this->updateComputersBefore();
+                $this->updateConnectionInfo();
             }
         }
     }
 }
 
 ////////////MAIN SCRIPT TO INITIATE SERVER////////////
-$server = IoServer::factory(new HttpServer(new WsServer(new RatchetServer())),8000);
+$server = IoServer::factory(new HttpServer(new WsServer(new RatchetServer())), 8000);
 $server->run();
