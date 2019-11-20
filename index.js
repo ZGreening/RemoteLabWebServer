@@ -57,13 +57,14 @@ onload = function () {
                 document.getElementById('ownId').innerHTML = "Your Computer ID is " + json[key];
                 break;
             case 'setControlsDisabled':
-                setControlsDisabled(json[key]['isDisabled']);
-                if(!json[key]['isDisabled']) {
+                setControlsDisabled(json[key]);
+                if(!json[key]) {
                     alert("Access Granted!");
-                    document.getElementById('computersBefore').innerHTML="You have access!<br/>";
-                    //Set a timer to return control after the controlDuration has elapsed.
-                    setTimeout(function() {returnControl()},json[key]['controlDuration']); 
+                    document.getElementById('computersBefore').innerHTML="You have access!<br/>";                    
                 }
+                break;
+            case 'setControlDuration':
+                setTimeout(function() {returnControl()},json[key]); 
                 break;
             case 'error':
                 alert(json[key]);

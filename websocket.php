@@ -157,15 +157,19 @@ class RatchetServer implements MessageComponentInterface
         $this->inControl = array_shift($this->queue);
 
         //Remove control and update computer info
-        $this->sendToAll(json_encode(array('setControlsDisabled' => ['isDisabled' => true])));
+        $this->sendToAll(json_encode(array('setControlsDisabled' => true)));
         $this->updateComputersBefore();
         $this->updateConnectionInfo();
 
         //Allow control to new client
         if ($this->inControl != null) {
-            $this->inControl->send(json_encode(array('setControlsDisabled' => ['isDisabled' => false,
-                'controlDuration' => $this->controlDuration])));
-        }
+            $this->inControl->send(json_encode(array('setControlsDisabled' => false)));
+
+            //Limit control duration only if more clients are in the queue
+            if(count($this->queue)>0) {
+                $this->inControl->send(json_encode(array('setControlDuration' => $this->controlDuration)));
+            }
+        }        
     }
 
     /////////////WEBSOCKET FUNCTIONS/////////////
@@ -245,6 +249,9 @@ class RatchetServer implements MessageComponentInterface
                 //If no one is currently controlling the device, go ahead and grant access
                 if ($this->inControl == null) {
                     $this->grantAccessToNext();
+                } else if(count($this->queue)==1) {
+                    //Only send duration setter if this is first client added to queue
+                    $this->inControl->send(json_encode(array('setControlDuration' => $this->controlDuration)));
                 }
 
                 //Update info on all other computers
