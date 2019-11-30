@@ -9,3 +9,6 @@ GrpcServer
 
 #Ingore database
 *.db
+
+#Ignore composer.phar installation file
+composer.phar
