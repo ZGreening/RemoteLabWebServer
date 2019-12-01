@@ -10,5 +10,7 @@ GrpcServer
 #Ingore database
 *.db
 
-#Ignore composer.phar installation file
+#Ignore composer installation files
 composer.phar
+composer.json
+composer.lock
