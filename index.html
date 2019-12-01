@@ -1,71 +1,108 @@
+<!DOCTYPE html>
+
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Welcome to the Remote Physics Lab</title>
-    <link rel="stylesheet" href="index.css">
-    <link href="https://fonts.googleapis.com/css?family=Muli" rel="stylesheet">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Web Page for controlling a Lorentz Force Demonstrator" />
+    <meta name="keywords" content="HTML,CSS,JavaScript" />
+    <meta name="author" content="Zachary Greening" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Remote Physics Lab</title>
+    <link id="stylesheet" rel="stylesheet" href="index.css" />
     <script type="text/JavaScript" src="index.js"></script>
 </head>
 
 <body>
-    <div>
+    <header>
+        <div class="ConnectionInfo">
+            <small id="computersWaiting">0 Computers Waiting</small><br />
+            <small id="computersConnected">0 Computers Connected</small><br />
+            <small id="controllingId">null Is In Control Of The Device</small><br />
+            <small id="ownId">Your Computer ID is unknown</small><br />
+        </div>
         <h1>Remote Physics Lab</h1>
-        <h5>Helping students learn Physics from anywhere</h5>
+        <h6>Helping students learn Physics from anywhere!</h6>
+    </header>
+
+    <nav>
+        <p id="connectionFeedback" style="color:red;">Trying Connection</p>
+
+        <div class="ControlDuration">
+            <small>Control Duration</small><br />
+            <input id=controlDurationSlider type="range" min="1" max="20" step="1" value="0"
+                onchange="onControlDurationChanged(this)">
+            <small id="controlDuration">0:00</small>
+        </div>
+
+        <div class="Request">
+            <button id="requestButton" disabled=True onclick="onRequestAccessPressed(this)">Request
+                Access</button><br />
+            <small id="computersBefore"><br /></small>
+        </div>
+    </nav>
+
+    <iframe id="VideoDisplay"></iframe>
+
+    <div id="Controls" class="Controls">
+        <div>
+            <div class="SliderLabel">
+                <h4>Deflecting Voltage</h4>
+                <p id="defVoltageValue">50 Volts</p>
+            </div>
+            <input id="defVoltageSlider" type="range" min="50" max="250" step="1" value="0" class="slider"
+                onchange="onDefVoltageSliderChanged(this)"></input>
+        </div>
+
+        <div>
+            <div class="SliderLabel">
+                <h4>Magnetizing Current</h4>
+                <p id="currentValue">0 Amperes</p>
+            </div>
+            <input id="currentSlider" type="range" min="0" value="0" max="3" step="0.05" class="slider"
+                onchange="onCurrentSliderChanged(this)"></input>
+        </div>
+
+        <div>
+            <div class="SliderLabel">
+                <h4>Accelerating Voltage</h4>
+                <p id="accVoltageValue">0 Volts</p>
+            </div>
+            <input id="accVoltageSlider" type="range" min="0" max="250" step="1" value="0" class="slider"
+                onchange="onAccVoltageSliderChanged(this)"></input>
+        </div>
+
+        <div>
+            <h4>Deflecting Voltage Polarity</h4>
+            <!--use integer values are for database storage-->
+            <input id="defVoltageOff" type="radio" name="defVoltagePolarity" onclick="onDefVoltagePolarityChanged(this)"
+                value="0" />
+            <label for="defVoltageOff">Off</label>
+            <input id="defVoltagePositive" type="radio" name="defVoltagePolarity"
+                onclick="onDefVoltagePolarityChanged(this)" value="1" />
+            <label for="defVoltagePositive">Positive</label>
+            <input id="defVoltageNegative" type="radio" name="defVoltagePolarity"
+                onclick="onDefVoltagePolarityChanged(this)" value="2" />
+            <label for="defVoltageNegative">Negative</label>
+        </div>
+
+        <div>
+            <h4>Magnetizing Arc</h4>
+            <!--use integer values are for database storage-->
+            <input id="magneticArcOff" type="radio" name="magneticArc" onclick="onMagneticArcChanged(this)" value="0" />
+            <label for="magneticArcOff">Off</label>
+            <input id="magneticArcClockwise" type="radio" name="magneticArc" onclick="onMagneticArcChanged(this)"
+                value="1" />
+            <label for="magneticArcClockwise">Clockwise</label>
+            <input id="magneticArcCounterClockwise" type="radio" name="magneticArc" onclick="onMagneticArcChanged(this)"
+                value="2" />
+            <label for="magneticArcCounterClockwise">Counter Clockwise</label>
+        </div>
+        </br>
+
     </div>
 
-    <div>
-        <!--<iframe width="640" height="480" frameborder="0" src="http://10.100.143.53:8081"></iframe>-->
-        <center class="card-body">
-            <br/>
-            <button id="requestButton" onclick="onRequestAccessPressed(this)">Request Access</button><br/>
-            <small id="computersBefore"></small>
-            <small id="computersWaiting">0 Computers Waiting</small><br/>
-            <small id="computersConnected">0 Computers Connected</small><br/>
-            <small id="controllingId">null Is In Control Of The Device</small><br/>
-            <small id="ownId">Your Computer ID is 0</small><br/>
-            <p id="connectedFeedback" style="color:red;">Trying Connection</p>
-        </center>
-    </div>
-
-    <div class="slideContainer">
-        <h4>Deflecting Voltage</h4>
-        <input id="defVoltageSlider" type="range" min="50" max="250" step="1" value="0" class="slider"
-            onchange="onDefVoltageSliderChanged(this)"></input>
-        <p id="defVoltageValue"></p>
-    </div>
-
-    <div>
-        <!--use integer values are for database storage-->
-        <input type="radio" name="defVoltagePolarity" onclick="onDefVoltagePolarityChanged(this)" value="0">
-        Off &nbsp;
-        <input type="radio" name="defVoltagePolarity" onclick="onDefVoltagePolarityChanged(this)" value="1">
-        Positive &nbsp;
-        <input type="radio" name="defVoltagePolarity" onclick="onDefVoltagePolarityChanged(this)" value="2">
-        Negative
-    </div>
-
-    <div class="slideContainer">
-        <h4>Magnetizing Current</h4>
-        <input id="currentSlider" type="range" min="0" value="0" max="3" step="0.05" class="slider"
-            onchange="onCurrentSliderChanged(this)"></input>
-        <p id="currentValue"></p>
-    </div>
-
-    <div> 
-        <!--use integer values are for database storage-->
-        <input type="radio" name="magneticArc" onclick="onMagneticArcChanged(this)" value="0"> Off &nbsp;
-        <input type="radio" name="magneticArc" onclick="onMagneticArcChanged(this)" value="1"> Clockwise &nbsp;
-        <input type="radio" name="magneticArc" onclick="onMagneticArcChanged(this)" value="2"> Counter Clockwise
-    </div>
-
-    <div class="slideContainer">
-        <h4>Accelerating Voltage</h4>
-        <input id="accVoltageSlider" type="range" min="0" max="250" step="1" value="0" class="slider"
-            onchange="onAccVoltageSliderChanged(this)"></input>
-        <p id="accVoltageValue"></p>
-    </div>
 </body>
 
 </html>
