@@ -104,7 +104,7 @@ function getDefVoltagePolarity()
 //////////WEBSOCKET SERVER CLASS//////////
 class RatchetServer implements MessageComponentInterface
 {
-    private $controlDuration = 15000; //Milliseconds before control is returned
+    private $controlDuration = 30000; //Milliseconds before control is returned
     private $queue = []; //Clients who have requested access
     private $inControl; //The client in control of the device
     private $clients; //All connected clients
@@ -146,8 +146,16 @@ class RatchetServer implements MessageComponentInterface
     //Updates Computers Connected, Computers Waiting, and the Controlling id on all computers
     private function updateConnectionInfo()
     {
-        $this->sendToAll(json_encode(array('computersConnected' => count($this->clients),
-            'computersWaiting' => count($this->queue), 'controllingId' => $this->inControl->resourceId)));
+        $array = array('computersConnected' => count($this->clients),
+            'computersWaiting' => count($this->queue), 'controllingId' => $this->inControl->resourceId);
+
+        if ($this->inControl == null) {
+            $array['setControlDurationSliderDisabled'] = false;
+        } else {
+            $array['setControlDurationSliderDisabled'] = true;
+        }
+
+        $this->sendToAll(json_encode($array));
     }
 
     //Removes control from the current user and gives it to the next user in the queue
@@ -166,10 +174,10 @@ class RatchetServer implements MessageComponentInterface
             $this->inControl->send(json_encode(array('setControlsDisabled' => false)));
 
             //Limit control duration only if more clients are in the queue
-            if(count($this->queue)>0) {
+            if (count($this->queue) > 0) {
                 $this->inControl->send(json_encode(array('setControlDuration' => $this->controlDuration)));
             }
-        }        
+        }
     }
 
     /////////////WEBSOCKET FUNCTIONS/////////////
@@ -183,6 +191,7 @@ class RatchetServer implements MessageComponentInterface
             'currentAmperage' => getCurrentAmperage(),
             'defVoltagePolarity' => getDefVoltagePolarity(),
             'magneticArc' => getMagneticArc(),
+            'controlDuration' => $this->controlDuration,
             'ownId' => $connection->resourceId);
 
         $connection->send(json_encode($json));
@@ -249,7 +258,7 @@ class RatchetServer implements MessageComponentInterface
                 //If no one is currently controlling the device, go ahead and grant access
                 if ($this->inControl == null) {
                     $this->grantAccessToNext();
-                } else if(count($this->queue)==1) {
+                } else if (count($this->queue) == 1) {
                     //Only send duration setter if this is first client added to queue
                     $this->inControl->send(json_encode(array('setControlDuration' => $this->controlDuration)));
                 }
@@ -257,6 +266,9 @@ class RatchetServer implements MessageComponentInterface
                 //Update info on all other computers
                 $this->updateComputersBefore();
                 $this->updateConnectionInfo();
+            } else if ($key == 'setControlDuration' && $this->inControl == null) { //Don't need to check queue
+                $this->controlDuration = $value;
+                $this->forwardMessage($from,$msg);
             }
         }
     }
@@ -265,3 +277,4 @@ class RatchetServer implements MessageComponentInterface
 ////////////MAIN SCRIPT TO INITIATE SERVER////////////
 $server = IoServer::factory(new HttpServer(new WsServer(new RatchetServer())), 8000);
 $server->run();
+echo "WebSocket listening on port 8000";

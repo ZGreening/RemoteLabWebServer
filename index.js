@@ -55,6 +55,13 @@ onload = function () {
                 case 'controllingId':
                     document.getElementById('controllingId').innerHTML = json[key] + " Is In Control Of The Device";
                     break;
+                case 'controlDuration':
+                    document.getElementById('controlDurationSlider').value = Math.floor(json[key] / 30000); //Convert from milliseconds
+                    document.getElementById("controlDuration").innerHTML = sliderValueToTimeString(Math.floor(json[key] / 30000));
+                    break;
+                case 'setControlDurationSliderDisabled':
+                    document.getElementById('controlDurationSlider').disabled = json[key];
+                    break;
                 case 'ownId':
                     document.getElementById('ownId').innerHTML = "Your Computer ID is " + json[key];
                     break;
@@ -137,22 +144,28 @@ function onMagneticArcChanged(radio) {
     webSocket.send(JSON.stringify({ magneticArc: radio.value }));
 }
 
-// Handle control duration changed
-function onControlDurationChanged(slider) {
-    var duration = Math.floor(slider.value / 2) //int division
+// Slider range is 1 to 20. Each int represents 30 seconds
+function sliderValueToTimeString(value) {
+    var duration = Math.floor(value / 2); //int division
 
-    if (slider.value % 2 == 1) {
-        duration += ":30"
+    if (value % 2 == 1) {
+        duration += ":30";
     } else {
-        duration += ":00"
+        duration += ":00";
     }
 
-    document.getElementById("controlDuration").innerHTML = duration
+    return duration;
+}
+
+// Handle control duration changed
+function onControlDurationChanged(slider) {
+    document.getElementById("controlDuration").innerHTML = sliderValueToTimeString(slider.value);
+    webSocket.send(JSON.stringify({ setControlDuration: slider.value * 30000 })); //Convert to milliseconds for server
 }
 
 // Handle access request
 function onRequestAccessPressed(button) {
     document.getElementById("requestButton").disabled = true;
     document.getElementById("requestButton").innerHTML = "Requested";
-    webSocket.send(JSON.stringify({ "requestAccess": "" }));
+    webSocket.send(JSON.stringify({ requestAccess: "" }));
 }

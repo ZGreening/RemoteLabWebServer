@@ -34,7 +34,7 @@ header {
     }
 }
 
-@media (max-width: 800px) {
+@media (max-width: 799px) {
     .Request {
         margin-left: 2%;
     }
@@ -60,20 +60,20 @@ header {
         margin-top: 1%;
         margin-left: 1%;
         width: 48%;
-        height: 68%;
+        height: 65%;
         background-color: black;
     }
 
     .Controls {
         margin-top: 1%;
         margin-right: 1%;
-        width: 49%;
+        width: 48%;
         float: right;
         text-align: center;
     }
 }
 
-@media (max-width: 800px) {
+@media (max-width: 799px) {
     iframe {
         margin-left: 2%;
         margin-right: 2%;
