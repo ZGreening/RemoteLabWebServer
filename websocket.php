@@ -268,7 +268,7 @@ class RatchetServer implements MessageComponentInterface
                 $this->updateConnectionInfo();
             } else if ($key == 'setControlDuration' && $this->inControl == null) { //Don't need to check queue
                 $this->controlDuration = $value;
-                $this->forwardMessage($from,$msg);
+                $this->forwardMessage($from,json_encode(array('controlDuration' => $this->controlDuration)));
             }
         }
     }
