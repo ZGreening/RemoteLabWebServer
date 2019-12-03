@@ -56,7 +56,7 @@ header {
 
 /* Positioning Controls and Frame */
 @media (min-width: 800px) {
-    iframe {
+    img {
         margin-top: 1%;
         margin-left: 1%;
         width: 48%;
@@ -74,7 +74,7 @@ header {
 }
 
 @media (max-width: 799px) {
-    iframe {
+    img {
         margin-left: 2%;
         margin-right: 2%;
         height: 50%;
